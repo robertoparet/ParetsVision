@@ -32,10 +32,15 @@ export async function POST(request: NextRequest) {
     const chunks = chunkText(document.content, 1000, 200);
     const embeddings = await Promise.all(
       chunks.map(chunk => generateEmbedding(chunk))
-    );
-
-    // Guardar en Supabase
+    );    // Guardar en Supabase
     const supabase = createServerSupabaseClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
 
     // Guardar el documento principal
     const { data: savedDocument, error: docError } = await supabase

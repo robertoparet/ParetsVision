@@ -35,35 +35,36 @@ export async function POST(request: NextRequest) {
         ]);
       } else {
         response = imageAnalysis;
-      }
-    } else {
-      // Solo mensaje de texto - buscar contexto relevante
+      }    } else {      // Solo mensaje de texto - buscar contexto relevante
       try {
         const supabase = createServerSupabaseClient();
-        const queryEmbedding = await generateEmbedding(message);
+        
+        if (supabase) {
+          const queryEmbedding = await generateEmbedding(message);
 
-        // Buscar documentos similares
-        const { data: documents, error } = await supabase
-          .from('documents')
-          .select('id, title, content, embedding')
-          .limit(5);
+          // Buscar documentos similares
+          const { data: documents, error } = await supabase
+            .from('documents')
+            .select('id, title, content, embedding')
+            .limit(5);
 
-        if (!error && documents) {
-          // Calcular similitudes y obtener los más relevantes
-          const similarities = documents
-            .filter(doc => doc.embedding)
-            .map(doc => ({
-              ...doc,
-              similarity: cosineSimilarity(queryEmbedding, doc.embedding)
-            }))
-            .filter(doc => doc.similarity > 0.3) // Umbral de relevancia
-            .sort((a, b) => b.similarity - a.similarity)
-            .slice(0, 3);
+          if (!error && documents) {
+            // Calcular similitudes y obtener los más relevantes
+            const similarities = documents
+              .filter(doc => doc.embedding)
+              .map(doc => ({
+                ...doc,
+                similarity: cosineSimilarity(queryEmbedding, doc.embedding)
+              }))
+              .filter(doc => doc.similarity > 0.3) // Umbral de relevancia
+              .sort((a, b) => b.similarity - a.similarity)
+              .slice(0, 3);
 
-          if (similarities.length > 0) {
-            context = similarities
-              .map(doc => `Documento: ${doc.title}\nContenido: ${doc.content.substring(0, 1000)}`)
-              .join('\n\n');
+            if (similarities.length > 0) {
+              context = similarities
+                .map(doc => `Documento: ${doc.title}\nContenido: ${doc.content.substring(0, 1000)}`)
+                .join('\n\n');
+            }
           }
         }
       } catch (error) {

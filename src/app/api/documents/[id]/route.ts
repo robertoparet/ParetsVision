@@ -13,6 +13,13 @@ export async function DELETE(
     const supabase = createServerSupabaseClient();
     const { id: documentId } = await context.params;
 
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
+
     // Eliminar chunks relacionados
     const { error: chunksError } = await supabase
       .from('document_chunks')

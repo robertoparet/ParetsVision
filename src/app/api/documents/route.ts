@@ -5,6 +5,13 @@ export async function GET() {
   try {
     const supabase = createServerSupabaseClient();
 
+    if (!supabase) {
+      return NextResponse.json({
+        success: true,
+        data: [] // Return empty array when Supabase is not configured
+      });
+    }
+
     const { data: documents, error } = await supabase
       .from('documents')
       .select('*')
