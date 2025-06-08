@@ -1,12 +1,8 @@
 import type { NextConfig } from "next";
 
-import type { NextConfig } from "next";
-
 const nextConfig: NextConfig = {
-  experimental: {
-    // Evitar ejecución de código de prueba en dependencias
-    serverComponentsExternalPackages: ['pdf-parse']
-  },
+  // Configuración para manejar dependencias externas
+  serverExternalPackages: ['pdf-parse'],
   webpack: (config, { isServer }) => {
     if (isServer) {
       // Prevenir que pdf-parse ejecute su código de prueba
